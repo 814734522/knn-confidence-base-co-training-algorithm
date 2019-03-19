@@ -209,16 +209,8 @@ class ECoRec(object):
         for triple in self.recommenders_predictions[r]:
             user, item, feedback = triple[0], triple[1], triple[2]
             # 得到置信度
-            neighbor, abc = rec.getknn(user, item)                      # 获得邻近用户评分
-            if abc:
-                c = 1                                                   # 没有邻近集的项
-            else:
-                vi = len(neighbor)
-                mean = np.mean(neighbor)  # 均值
-                for u in neighbor:
-                    num1 += np.abs(u - mean)
-                c = np.float32(vi / num1)  # 结果
-
+            c = rec.getknn(user, item)
+            
             if c != 0:
                 # print(c.get(user))
                 confident.append((user, item, feedback, c))
