@@ -228,34 +228,21 @@ class UserKNN(BaseKNN):
         u_id = self.user_to_user_id[user]
         su_matrix = self.compute_similarity(transpose=False, nomalize=False)    # 获得相似矩阵
         neighbor = sorted(range(len(su_matrix[u_id])), key=lambda x: -su_matrix[u_id][x], reverse=True)  # 返回降序的用户邻近id
-
+        num = 0
+        
         for u in neighbor[1: self.k_neighbors]:
             user1 = self.user_id_to_user[u]                                    # id 转为用户
             if item in self.train_set['items_seen_by_user'][user1]:
                 knn.append(self.train_set['feedback'][user1][item])
         if len(knn) == 0:
-            abc = True                                                        # 没有邻近集
+            c = 1                                                              # 没有邻近集
         else:
-            abc = False
-        return knn, abc                                                       # 返回前邻近用户评分
-
-    # 获得邻近集字典
-    def get_neighbor(self, file):
-
-        knn = {}
-        a = []
-        su_matrix = self.compute_similarity(transpose=False, nomalize=False)  # 获得相似矩阵
-        for user in self.train_set['users']:
-            u_id = self.user_to_user_id[user]
-            neighbor = sorted(range(len(su_matrix[u_id])), key=lambda x: -su_matrix[u_id][x],
-                              reverse=True)  # 返回降序的用户邻近id
-            for item in self.train_set['items_seen_by_user'][user]:
-                for u in neighbor[1: self.k_neighbors]:
-                    user1 = self.user_id_to_user[u]  # id 转为用户
-                    if item in self.train_set['items_seen_by_user'][user1]:
-                        a.append(self.train_set['feedback'][user1][item])
-                    knn.setdefault(user, {}).update({item: a})
-        return knn                                                              # 获得邻近文件
+            vi = len(knn)
+            mean = np.mean(knn)                                                 # 均值
+            for i in knn:
+                num += np.abs(i - mean)
+            c = np.flaot32(vi / num1)                                           # 置信度
+        return c                                                                # 返回前邻近用户评分
 
     def compute(self, verbose=True, metrics=None, verbose_evaluation=True, as_table=False, table_sep='\t'):
         """
