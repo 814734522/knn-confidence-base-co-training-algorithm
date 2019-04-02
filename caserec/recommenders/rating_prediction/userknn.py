@@ -4,7 +4,7 @@ import numpy as np
 
 from caserec.utils.extra_functions import timed
 from caserec.recommenders.rating_prediction.base_knn import BaseKNN
-
+from caserec.utils.extra_functions import ComputeBui
 '''1、添加获得KNN列表'''
 
 
@@ -85,7 +85,7 @@ class UserKNN(BaseKNN):
         for item in self.items:
             for user in self.train_set['users_viewed_item'].get(item, []):
                 self.users_id_viewed_item.setdefault(item, []).append(self.user_to_user_id[user])
-
+        
     def predict(self):
         """
         Method to predict ratings for all known users in the train set.
@@ -226,7 +226,7 @@ class UserKNN(BaseKNN):
 
         knn = []
         u_id = self.user_to_user_id[user]
-        su_matrix = self.compute_similarity(transpose=False, nomalize=False)    # 获得相似矩阵
+        su_matrix = self.su_matrix          # 获得相似矩阵
         neighbor = sorted(range(len(su_matrix[u_id])), key=lambda x: -su_matrix[u_id][x], reverse=True)  # 返回降序的用户邻近id
         num = 0
         
@@ -234,6 +234,7 @@ class UserKNN(BaseKNN):
             user1 = self.user_id_to_user[u]                                    # id 转为用户
             if item in self.train_set['items_seen_by_user'][user1]:
                 knn.append(self.train_set['feedback'][user1][item])
+                
         if len(knn) == 0:
             c = 1                                                              # 没有邻近集
         else:
